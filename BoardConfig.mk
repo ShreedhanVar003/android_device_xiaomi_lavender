@@ -4,6 +4,53 @@ BOARD_VENDOR := xiaomi
 # Security patch level
 VENDOR_SECURITY_PATCH := 2021-10-01
 
+# Architecture
+TARGET_ARCH := arm64
+TARGET_ARCH_VARIANT := armv8-a
+TARGET_CPU_ABI := arm64-v8a
+TARGET_CPU_ABI2 :=
+TARGET_CPU_VARIANT := generic
+TARGET_CPU_VARIANT_RUNTIME := cortex-a73
+
+TARGET_2ND_ARCH := arm
+TARGET_2ND_ARCH_VARIANT := armv8-a
+TARGET_2ND_CPU_ABI := armeabi-v7a
+TARGET_2ND_CPU_ABI2 := armeabi
+TARGET_2ND_CPU_VARIANT := generic
+TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a73
+
+# Assert
+TARGET_OTA_ASSERT_DEVICE := lavender
+
+# Audio
+BOARD_USES_ALSA_AUDIO := true
+USE_CUSTOM_AUDIO_POLICY := 1
+BOARD_SUPPORTS_SOUND_TRIGGER := true
+AUDIO_FEATURE_ENABLED_GEF_SUPPORT := true
+AUDIO_FEATURE_ENABLED_EXT_AMPLIFIER := false
+
+# Bootloader
+TARGET_BOOTLOADER_BOARD_NAME := sdm660
+TARGET_NO_BOOTLOADER := true
+
+# Camera
+TARGET_USES_QTI_CAMERA_DEVICE := true
+
+# Display
+TARGET_USES_HWC2 := true
+TARGET_USES_GRALLOC1 := true
+TARGET_USES_ION := true
+TARGET_SCREEN_DENSITY := 420
+
+OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
+
+# DRM
+TARGET_ENABLE_MEDIADRM_64 := true
+
+# FM
+AUDIO_FEATURE_ENABLED_FM_POWER_OPT := true
+BOARD_HAS_QCA_FM_SOC := cherokee
+
 # HIDL
 DEVICE_MANIFEST_FILE := $(DEVICE_PATH)/manifest.xml
 DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/android.hardware.atrace@1.0-service.xml
@@ -14,14 +61,74 @@ DEVICE_MANIFEST_FILE += $(DEVICE_PATH)/vendor.qti.gnss@3.0-service.xml
 DEVICE_MATRIX_FILE := $(DEVICE_PATH)/compatibility_matrix.xml
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := $(DEVICE_PATH)/framework_compatibility_matrix.xml
 
+# Kernel
+BOARD_KERNEL_CMDLINE := console=ttyMSM0,115200n8 androidboot.console=ttyMSM0 earlycon=msm_serial_dm,0xc170000 androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 sched_enable_power_aware=1 service_locator.enable=1 swiotlb=1 androidboot.configfs=true androidboot.usbcontroller=a800000.dwc3
+BOARD_KERNEL_CMDLINE += loop.max_part=7
+BOARD_KERNEL_CMDLINE += androidboot.selinux=permissive
+BOARD_KERNEL_CMDLINE += androidboot.init_fatal_reboot_target=recovery
+BOARD_KERNEL_BASE := 0x00000000
+BOARD_KERNEL_PAGESIZE := 4096
+BOARD_KERNEL_SEPARATED_DTBO := true
+BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
+TARGET_KERNEL_SOURCE := kernel/xiaomi/lavender
+TARGET_KERNEL_CONFIG := lavender_defconfig
+# TARGET_KERNEL_CLANG_COMPILE := true
+TARGET_KERNEL_CLANG_VERSION := proton
+TARGET_KERNEL_CLANG_PATH := $(shell pwd)/prebuilts/clang/host/linux-x86/clang-proton
+TARGET_KERNEL_CROSS_COMPILE_PREFIX := $(TARGET_KERNEL_CLANG_PATH)/bin/aarch64-linux-gnu-
+TARGET_KERNEL_CROSS_COMPILE_ARM32_PREFIX := $(TARGET_KERNEL_CLANG_PATH)/bin/arm-linux-gnueabi-
+
+# Partitions
+BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
+BOARD_BOOTIMAGE_PARTITION_SIZE := 0x04000000
+BOARD_DTBOIMG_PARTITION_SIZE := 8388608
+BOARD_BUILD_SYSTEM_ROOT_IMAGE := true
+ifneq ($(AB_OTA_UPDATER), true)
+BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
+BOARD_CACHEIMAGE_PARTITION_SIZE := 268435456
+BOARD_RECOVERYIMAGE_PARTITION_SIZE := 0x04000000
+endif
+BOARD_SYSTEMIMAGE_PARTITION_SIZE := 3640619008
+BOARD_VENDORIMAGE_PARTITION_SIZE := 2080305152
+BOARD_SYSTEMIMAGE_PARTITION_TYPE := ext4
+BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
+
+BOARD_ROOT_EXTRA_SYMLINKS := \
+    /vendor/dsp:/dsp \
+    /vendor/firmware_mnt:/firmware \
+    /vendor/bt_firmware:/bt_firmware \
+    /mnt/vendor/persist:/persist
+
+TARGET_COPY_OUT_VENDOR := vendor
+TARGET_USERIMAGES_USE_EXT4 := true
+TARGET_USERIMAGES_USE_F2FS := true
+
 # Properties
 TARGET_ODM_PROP += $(DEVICE_PATH)/odm.prop
 TARGET_PRODUCT_PROP += $(DEVICE_PATH)/product.prop
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
 
+# QCOM hardware
+BOARD_USES_QCOM_HARDWARE := true
+
+# Recovery
+TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/rootdir/etc/fstab.qcom
+
 # Releasetools
 TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)
+
+# Releasetools
+TARGET_RELEASETOOLS_EXTENSIONS := $(DEVICE_PATH)
+
+# RIL
+ENABLE_VENDOR_RIL_SERVICE := true
+
+# Sepolicy
+include device/qcom/sepolicy_vndr/SEPolicy.mk
+
+# Treble
+BOARD_VNDK_VERSION := current
 
 # Verified Boot
 BOARD_AVB_ENABLE := true
@@ -31,5 +138,20 @@ BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa2048.pem
 BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA2048
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
+
+# Wifi
+BOARD_HAS_QCOM_WLAN := true
+BOARD_WLAN_DEVICE := qcwcn
+BOARD_HOSTAPD_DRIVER := NL80211
+BOARD_HOSTAPD_PRIVATE_LIB := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
+BOARD_WPA_SUPPLICANT_DRIVER := NL80211
+BOARD_WPA_SUPPLICANT_PRIVATE_LIB := lib_driver_cmd_$(BOARD_WLAN_DEVICE)
+WIFI_DRIVER_FW_PATH_AP := "ap"
+WIFI_DRIVER_FW_PATH_STA := "sta"
+WIFI_DRIVER_FW_PATH_P2P := "p2p"
+WIFI_HIDL_FEATURE_DUAL_INTERFACE := true
+WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
+WPA_SUPPLICANT_VERSION := VER_0_8_X
+
 
 -include vendor/xiaomi/lavender/BoardConfigVendor.mk
